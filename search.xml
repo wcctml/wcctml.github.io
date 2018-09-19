@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title><![CDATA[Effective C++笔记 4-5]]></title>
+    <url>%2Fposts%2F20b36fe4%2F</url>
+    <content type="text"><![CDATA[原书在线阅读条款04： 确保对象在使用前被初始化C风格数组不保证其内容被初始化，STL中vector保证初始化；内置类型手工初始化,外置类型确保每一个构造函数都将对象的每一个成员初始化；12345int x = 0; // manual initialization of an intconst char * text = "A C-style string"; // manual initialization of a // pointer (see also Item 3)double d; // "initialization" by reading fromstd::cin &gt;&gt; d; // an input stream对象成员变量的初始化动作发生在进入构造函数之前，对于内置类型初始化和赋值成本相同1234567ABEntry::ABEntry(const std::string&amp; name, const std::string&amp; address, const std::list&lt;PhoneNumber&gt;&amp; phones): theName(name), theAddress(address), // these are now all initializations thePhones(phones), numTimesConsulted(0)&#123;&#125; // the ctor body is now emptydefault构造成员变量123456ABEntry::ABEntry():theName(), // call theName's default ctor; theAddress(), // do the same for theAddress; thePhones(), // and for thePhones; numTimesConsulted(0) // but explicitly initialize&#123;&#125; // numTimesConsulted to zeroc++ 成员初始化顺序：base classes早于derived classes被初始化，class的成员变量比声明顺序初始化，成员初始化列表不影响初始化顺序，初始化array需要指定大小，代表大小的成员变量需要先有初值；C++对于不同编译单元内的非局部静态对象的初始化次序没有明确定义1234567891011121314151617//在tfs对象被创建之前不能使用。class FileSystem &#123; // from your librarypublic: std::size_t numDisks() const; // one of many member functions&#125;;extern FileSystem tfs; // object for clients to use; // "tfs" = "the file system" class Directory &#123; // created by library clientpublic: Directory( params );&#125;;Directory::Directory( params )&#123; std::size_t disks = tfs.numDisks(); // use the tfs object&#125;将静态对象移到它自己的函数中声明为static。函数返回对象的引用。12345678910111213141516171819class FileSystem &#123; ... &#125;; // as beforeFileSystem&amp; tfs() // this replaces the tfs object; it could be&#123; // static in the FileSystem class static FileSystem fs; // define and initialize a local static object return fs; // return a reference to it&#125;class Directory &#123; ... &#125;; // as beforeDirectory::Directory( params ) // as before, except references to tfs are&#123; // now to tfs() std::size_t disks = tfs().numDisks();&#125;Directory&amp; tempDir() // this replaces the tempDir object; it&#123; // could be static in the Directory class static Directory td; // define/initialize local static object return td; // return reference to it&#125;在多线程中存在次序问题。解决这个麻烦的方法之一是在程序的单线程的启动部分手动调用所有初始化函数。避免 与初始化次序相关的混乱环境。要点：避免在初始化之前使用对象，你只需要做三件事。首先，手动初始化内置类型的 非成员对象。第二，使用成员初始化列表初始化 对象的所有部分。最后，在设计中绕过搞乱定义在分离的转换单元中的非局部静态对象初始化顺序的不确定性。记住手动初始化 built-in type（内建类型）的 objects（对象），因为 C++ 只在某些时候才会自己初始化它们。构造函数使用成员初始化列表，成员初始化表的排列次序应该与class中声明次序相同；为避免跨编译单元的初始化次序问题，以局部静态对象替换非局部静态对象；条款05： 了解C++默默编写并调用了哪些函数如果你没有声明，编译器默认生成的函数：copy构造函数、copy assignment操作符、析构函数12345678class Empty &#123;public: Empty() &#123; ... &#125; // default constructor Empty(const Empty&amp; rhs) &#123; ... &#125; // copy constructor ~Empty() &#123; ... &#125; // destructor — see below // for whether it's virtual Empty&amp; operator=(const Empty&amp; rhs) &#123; ... &#125; // copy assignment operator&#125;;注意，生成的析构函数是non-virtual的，除非基类声明了一个虚拟析构函数（这种情况下，函数的virtualness（虚拟性）来自基类）。如果基类将copy assignment操作符声明为private，编译器拒绝为其派生类生成copy assignment运算符。记住编译器会暗自为class创建default构造函数、copy构造函数、copy assignment操作符、析构函数。]]></content>
+      <categories>
+        <category>读书笔记</category>
+      </categories>
+      <tags>
+        <tag>c++</tag>
+        <tag>effective c++</tag>
+        <tag>读书笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Effective C++笔记 1-3]]></title>
+    <url>%2Fposts%2Fa180e4c3%2F</url>
+    <content type="text"><![CDATA[原书在线阅读条款01：视C++为一个语言联邦条款02：尽量以const,enum,inline替换#define宁可以编译器替换预处理器123456//编译器错误信息中很可能用 1.653 取代了 ASPECT_RATIO//用 constant（常量）来替代 macro（宏）：#define ASPECT_RATIO 1.653const double AspectRatio = 1.653;//使用 constant（常量）比使用 #define 能产生更小的代码。//因为 preprocessor（预处理器）用1.653替换ASPECT_RATIO，导致object code中存在多个 1.653 的拷贝。两种例外的情况1、定义常量指针1234//在头文件中定义一个基于char* 的字符串常量时，你必须写两次const：const char * const authorName = "Scott Meyers";//string objects通常比 char*-based的更合适const std::string authorName("Scott Meyers");2、class专属常量 1234567891011class GamePlayer &#123;private: static const int NumTurns = 5; // constant declaration int scores[NumTurns]; // use of constant&#125;;//只要不取它们的地址，就无须提供定义式；//如果你需要取class专属常量的地址，你需要在实现文件提供如下这样一个独立的 定义：const int GamePlayer::NumTurns; // definition of NumTurns; see // below for why no value is given **#defines不仅不能用于定义class专属常量，而且不能提供任何形式的封装** enum hack12345678//enum可以拒绝让别人通过指针或引用指向你的整数常量class GamePlayer &#123;private: enum &#123; NumTurns = 5 &#125;; // "the enum hack" - makes // NumTurns a symbolic name for 5 int scores[NumTurns]; // fine&#125;;宏夹带着宏实参调用函数12345678910111213// call f with the maximum of a and b#define CALL_WITH_MAX(a, b) f((a) &amp;gt; (b) ? (a) : (b))int a = 5, b = 0;CALL_WITH_MAX(++a, b); // a is incremented twiceCALL_WITH_MAX(++a, b+10); // a is incremented once//用inline模板函数替换template&lt;typename T&gt; // because we don'tinline void callWithMax(const T&amp; a, const T&amp; b) // know what T is, we&#123; // pass by reference-to- // const - see Item 20 f(a &gt; b ? a : b); &#125;记住1、对于单纯常量，用const对象或enums替换#defines。2、对于类似函数的宏，用inline函数替换#defines。条款03：尽可能的使用const123456789char greeting[] = "Hello";char *p = greeting; // non-const pointer, non-const dataconst char *p = greeting; // non-const pointer, const datachar * const p = greeting; // const pointer, non-const dataconst char * const p = greeting; // const pointer, const data//如果const出现在星号左边，则指针指向的内容为常量；//如果const出现在星号右边，则指针自身为常量；//如果const出现在星号两边，则两者都为常量。当指针指向的内容为常量时，一些人将 const 放在类型之前，另一些人将它放在类型之后星号之前。两者在意义上并没有区别，所以，如下两个函数具有相同的参数类型：123void f1(const Widget *pw); //f1 takes a pointer to a constant Widget objectvoid f2(Widget const *pw); //so does f2const iterator不能将这个iterator 指向另外的东西;但是它所指向的东西的值可以改动。如果你要一个iterator 指向的东西不可被改动，你需要const_iterator：123456789std::vector&lt;int&gt; vec;// iter acts like a T* constconst std::vector&lt;int&gt;::iterator iter = vec.begin(); *iter = 10; // OK, changes what iter points to++iter; // error! iter is const// cIter acts like a const T*std::vector&lt;int&gt;::const_iterator cIter = vec.begin(); *cIter = 10; // error! *cIter is const++cIter; // fine, changes cIter令函数返回一个 const常量除非你需要改变一个参数或作为本地对象的能力，否则确保将它声明为const。1234const Rational operator*(const Rational&amp; lhs, const Rational&amp; rhs);//避免下面这种行为(a * b) = c; // invoke operator= on the result of a*b!if (a * b = c) ... // 手残党的福音const成员函数mutable释放掉非静态数据成员bitwise constness（二进制位常量性）的约束：123456789101112131415161718192021222324 const char&amp; operator[](std::size_t position) const // operator[] for &#123; return text[position]; &#125; // const objects char&amp; operator[](std::size_t position) // operator[] for &#123; return text[position]; &#125; class CTextBlock &#123;public: std::size_t length() const;private: char *pText; mutable std::size_t textLength; // these data members may mutable bool lengthIsValid; // always be modified, even in&#125;; // const member functionsstd::size_t CTextBlock::length() const&#123; if (!lengthIsValid) &#123; textLength = std::strlen(pText); // now fine lengthIsValid = true; // also fine &#125; return textLength;&#125;避免const和non-const成员函数的重复记住，一个const成员函数承诺绝不会改变它的对象的逻辑状态，non-const 成员函数却没有这样的承诺。12345678910111213141516class TextBlock &#123;public: const char&amp; operator[](std::size_t position) const // same as before &#123; return text[position]; &#125; char&amp; operator[](std::size_t position) // now just calls const op[] &#123; return const_cast&lt;char&amp;&gt;( // cast away const on // op[]'s return type; static_cast&lt;const TextBlock&amp;&gt;(*this) // add const to *this's type; [position] // call const version of op[] ); &#125;&#125;;记住1、将某些东西声明为const有助于编译器发现使用错误。const可被施加于任何作用域的对象、函数参数、函数返回类型、成员函数本体。2、编译器强制实施 bitwise constness（二进制位常量性），但你编写程序时应使用 conceptual constness（概念上的常量性）。3、当 const 和 non-const member成员函数有着本质上相同的实现时，应使用 non-const版本调用const版本避免代码重复。]]></content>
+      <categories>
+        <category>读书笔记</category>
+      </categories>
+      <tags>
+        <tag>c++</tag>
+        <tag>读书笔记</tag>
+        <tag>effectivec++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[老牌直播软件OBS-Studio编译环境生成&&在VS2017添加QtWebEngine]]></title>
+    <url>%2Fposts%2F9b548605%2F</url>
+    <content type="text"><![CDATA[直播元年早已过去。。。而我们才刚刚开始。介绍老牌直播软件OBS-Studio编译的环境生成和Qt使用遇到的一些麻烦事。起到一个参考的作用。现在已经没有网上教程那么复杂。作为OBS官方文档的补充。我的环境：Win10 64位 VS2017还在使用VS2010？，需要先去下载VS2013以上版本的IDE。Stuck on an older toolset version? Move to Visual Studio 2017 without upgrading your toolsetOBS官方构建教程首先是环境Qt最新版不提供msvc2017_32位版本所以在网上找个别人编译好的。当然也可以直接使用msvc2015_32版本的，因为安装VS2017时也可以安装VS2015的平台工具集,然后你就需要参考这篇文章进行调整VS2017自带VS2015编译器等在命令行下无法使用问题。Qt5.9.1 msvc2017_32位版本(里面有32和64位的)：http://pan.baidu.com/s/1cgy7hG如果你直接有msvc2017_32就不需要安装Qt了，但是还是建议你装。Qt5.9.1版本下载地址cmake下载：我是64位系统直接选压缩包，解压可用。cmake-3.10.0-win64-x64.zip 下载地址下载安装DXSDK_Jun10.exe 地址OBS依赖下载VS2013: https://obsproject.com/downloads/dependencies2013.zipVS2015: https://obsproject.com/downloads/dependencies2015.zipVS2017: ABI compatible with VS2015OBS官方给的依赖也是直接VS2015的。VS2017: ABI compatible with VS2015保证所有代码拉取下来。包含子模块1git clone --recursive https://github.com/jp9000/obs-studio.git打开CMake 设置依赖库DepsPath为dependencies到include目录；QTDIR设置到msvc2017_32目录。先点‘Configure’ 生成vs项目文件要选择“Visual Studio 15 2017”。点‘Generate’ 配置，生成项目文件。如果要生成64位程序所有对应的都要选择X64。点击open打开项目，生成。我拉取时的代码有一个编译错误！更改命名后可以编译通过，等你拉到最新代码到时候官方应该已经改了。编译结束后，运行程序在rundir目录下。关于QtWebEngineQt使用Chromium替代Qt WebKit后是一个独立的模块，需要独立添加。如果使用Qt Creator进行开发，你只需要编辑.pro项目文件加上“QT += webkitwidgets”。如果你使用的是MSVC按以下介绍进行手动添加依赖。有时间的话可以写到MakeList就不用每个人都搞一遍。基本步骤就是按第三篇文档添加，最后还需要按第二篇文档说的把Chromium依赖资源文件拷贝到运行程序目录。QtWebEngine介绍部署QtWebEngine官方文档网上一篇文章Qt程序接下来可能会遇到的问题：减少Qt程序体积如果你需要编译obs-browser(cef3内核浏览器插件):先需要编译CEF Standard Distribution cef_binary_3.3202.1694.gf061c23_windows32.tar.bz2下载解压后打开cmake,选择对应的路径，先”Configure”选择vs2017，再”Generate”,”Open project” 编译生成。再回到OBS的生成需要勾选 BUILD_BROWSER ，还需要增加配置下面两个变量,是你编译生成后的项目目录12CEFWRAPPER_LIBRARY = E:/code/cef_binary_3.3202.1694.gf061c23_windows32/build/libcef_dll_wrapper/Release/libcef_dll_wrapper.libCEF_ROOT_DIR ＝ E:/code/cef_binary_3.3202.1694.gf061c23_windows32]]></content>
+      <categories>
+        <category>c++</category>
+        <category>obs</category>
+      </categories>
+      <tags>
+        <tag>OBS</tag>
+        <tag>直播</tag>
+        <tag>编译</tag>
+        <tag>obsstudio</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[python生成自定义中文词云学习日记]]></title>
+    <url>%2Fposts%2F235ba016%2F</url>
+    <content type="text"><![CDATA[接上文 从CentOS安装完成到生成词云python学习日记对源代码进行修改生成中文词云；可以随便找一篇中文文章，我这里下载了一部小说《多情剑客无情剑》进行词云绘制。还根据背景图片生成了自定义的词云；源码的说明看注释。先安装jieba中文分词库1pip install jieba源代码：1234567891011121314151617181920212223242526# -*- coding: UTF-8 -*-import matplotlib# Force matplotlib to not use any Xwindows backend.#matplotlib.use('Agg')import jiebafrom wordcloud import WordCloudimport matplotlib.pyplot as pltbackgroud_image = plt.imread('man.jpg') #设置背景图片textfile = open("TheSentimentalSwordsman.txt",'r').read()#join的用法#str = "-";#seq = ("a", "b", "c"); # 字符串序列#print str.join( seq );#输出为a-b-ccut_text = " ".join(jieba.cut(textfile)) #使用了jieba中文分词wordcloud = WordCloud(font_path="./simhei.ttf",width=800, height=600, margin=5, max_words=2000,mask=backgroud_image).generate(cut_text)# mask=backgroud_Image,设置背景图片 全白（#FFFFFF）的部分将不会绘制，其余部分会用于绘制词云。# width,height,margin可以设置图片属性# generate 可以对全部文本进行自动分词,但是他对中文支持不好# 你可以通过font_path参数来设置字体集# background_color参数为设置背景颜色,默认颜色为黑色wordcloud.to_file("TheSentimentalSwordsman.png")普通生成的中文词云原图不需要绘制的地方为存白色。用ps弄的。自定义图片绘制词云效果]]></content>
+      <categories>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>中文词云</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[从CentOS安装完成到生成词云python学习日记]]></title>
+    <url>%2Fposts%2F2eba6da3%2F</url>
+    <content type="text"><![CDATA[前言人生苦短，我用python。学习python怎么能不搞一下词云呢是不是(ง •̀_•́)ง于是便有了这篇边实践边记录的笔记。环境：VMware 12pro + CentOS7 + Python 2.7.5安装系统之前一直用的是win10子系统，现在试试CentOS，CentOS官网下载最新系统dvd版 安装到VMware 12pro。网上很多教程。例如这个链接。等待安装完成后开始。第一个命令用Ubuntu的时候没有的命令会提示你安装，感觉很简单的事。但是到CentOS上却变得很头痛。打开终端在执行以下命令安装python-pip时提示。123sudo yum install python-pip没有可用软件包 python-pip。google了一下说是这个包在EPEL源里，要添加EPEL源才可以。执行下面两个命令就安装好了。123yum install epel-release.noarch yum install python-pippython库安装接下来安装一个词云wordcloud12345678pip install -i https://pypi.tuna.tsinghua.edu.cn/simple wordcloud截取部分提示错误信息 unable to execute gcc: No such file or directoryerror: command 'gcc' failed with exit status 1连gcc都没有(ง •̀_•́)ง。先安装gccyum install gccgcc装完后继续安装wordcloud!又报了下面的错误12345_posixsubprocess.c:3:20: 致命错误：Python.h：没有那个文件或目录于是需要先安装python-develsudo yum install python-devel #注意这里不是python-devCentOS 下叫做 python-devel，Ubuntu 下还是叫做 python-dev。wordcloud安装完毕！代码生成词云一份代码，并且随便找一份英文（我在ChinaDaily找的文章 Recruiters starting to employ social media 放到 txt/word.txt中123456789101112131415# -*- coding: UTF-8 -*-import matplotlib# Force matplotlib to not use any Xwindows backend.#matplotlib.use('Agg')from wordcloud import WordCloudtextfile = open(u'txt/word.txt','r').read()wordcloud = WordCloud(background_color="white",width=800, height=600, margin=5).generate(textfile)# width,height,margin可以设置图片属性# generate 可以对全部文本进行自动分词,但是它对中文支持不好#background_color参数为设置背景颜色,默认颜色为黑色wordcloud.to_file('word.png')执行命令运行 python clouddemo.py 报错提示12SyntaxError: Non-ASCII character '\xe5' in file clouddemo.py on line 6, but no encoding declared; see http://www.python.org/peps/pep-0263.html for details原因如下Python默认是以ASCII作为编码方式的，如果在Python源码中包含了中文（或者其他非英语系的语言），此时即使你把自己编写的Python源文件以UTF-8格式保存，但实际上，这依然是不行的。解决办法很简单，只要在文件开头加入下面代码；指定文件的编码格式为utf-8。上面的代码我已经加好了(。・`ω´・)。1# -*- coding: UTF-8 -*-编码问题解决了。接下来重新运行。还是报错！！！1ImportError: No module named Tkinter首先yum list installed | grep ^tk查看是否存在相应模块，如果不存在则通过yum install tkinter 和yum install -y tk-devel下载相应模块。重新执行命令提示下一个错误1_tkinter.TclError: no display name and no $DISPLAY environment variable虽然一波N折，但是最后还是成功了！！！看看源代码目录下的词云图！效果图如下：]]></content>
+      <categories>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>词云</tag>
+        <tag>wordcloud</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[网站不带WWW访问时矢量字体加载不出来]]></title>
+    <url>%2Fposts%2F75663ba8%2F</url>
+    <content type="text"><![CDATA[之前博客使用的是typecho，由于博客使用了一些矢量字体代替图标，但是习惯直接输入域名不带www访问博客时经常加载不出来，提示错误如下。1234Access to Font at 'usr/themes/fonts/fontawesome-webfont.ttf?v=4.6.3'from origin '' has been blocked by CORS policy: No 'Access-Control-Allow-Origin'header is present on the requested resource. Origin '' is therefore not allowedaccess.本人也不是搞web开发的，一开始不清楚，还以为是跨域的问题，还去给作者提了Issues。O(∩_∩)O慢慢后来发现带www访问的时候能百分百加载出来，不带的www就加载不出来，于是去搜索才发现原来是这样子。baidu.com 和 www.baidu.com。实际上这两个是完全不同的域名，只是为了访问方便而许多大网站都对不带WWW的域名做了跳转。所实现的技术就叫做301重定向，这样设置可以让用户的体验更好，何乐而不为呢？只需要在网站/public_html/目录下创建.htaccess这个文件。然后添加如下规则：1234567&lt;Files ~ "^.(htaccess|htpasswd)$"&gt;deny from all&lt;/Files&gt;RewriteEngine onRewriteCond %&#123;HTTP_HOST&#125; ^(domain\.com)(:80)? [NC]RewriteRule ^(.*) http://www.domain.com/$1 [R=301,L]order deny,allowdomain.com就是你的域名 替换就行了更详细请参考百科]]></content>
+      <categories>
+        <category>运维</category>
+        <category>有趣的bug</category>
+      </categories>
+      <tags>
+        <tag>网站重定向</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[C++ 构造函数 explicit关键字不起作用的一次小坑记录]]></title>
+    <url>%2Fposts%2F413d867%2F</url>
+    <content type="text"><![CDATA[C++中的explicit关键字只能用于修饰只有一个参数的类构造函数,它的作用是表明该构造函数是显示的, 而非隐式的, 跟它相对应的另一个关键字是implicit, 意思是隐藏的, 类构造函数默认情况下即声明为implicit(隐式)。12345678910111213141516171819202122232425class CGay&#123;public: explicit CGay(bool bShow = false, const string strName = ""); ~CGay();private: bool m_bShow; string m_strName;&#125;;CGay::CGay(bool bShow, const string strName)&#123; m_bShow = bShow; m_strName = strName;&#125;CGay::~CGay()&#123;&#125;const string GAY = "GAY";CGay aGay(GAY); //调用失败CGay aGay("Gay1"); //调用成功被隐式转换为了CGay(true,"");CGay aGay(1); //调用成功被隐式转换为了CGay(true,"");如果之前的构造函数是CGay(const string strName = “”)，并且已经有几个地方被使用过了。调用是这样：12CGay aGay("Gay1");CGay aGay("Gay2");然后又增加了一个新的默认参数改成1CGay(bool bShow = false, const string strName = "");之前写的Gay1、Gay2都不会有任何报错提示。合法的。这样就很坑了。增加一个参数的时候，从后面增加；不要在构造函数里写这种幺蛾子，增加一个void SetShow(bool bShow)的接口；]]></content>
+      <categories>
+        <category>有趣的bug</category>
+        <category>c++</category>
+      </categories>
+      <tags>
+        <tag>explicit</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[vld配置 应用程序正常初始化 0x0150002失败 bug解决记录]]></title>
+    <url>%2Fposts%2F23a00bb%2F</url>
+    <content type="text"><![CDATA[在项目中使用了visual leak detector，编译时没有任何错误，相应的库文件也有了，但是运行时就提示，应用程序无法正常启动 0x0150002 请单击确定关闭应用程序。win10搜索事件查看器，找到对应的出错日志，如下图：错误提示为： vld_x86.dll”的激活上下文生成失败。 找不到从属程序集 Microsoft.DTfW.DHL,processorArchitecture=”x86”,type=”win32”,version=”6.11.1.404”。 请使用 sxstrace.exe 进行详细诊断。解决方案把VLD中的文件复制到执行文件目录下就正常了Microsoft.DTfW.DHL.manifestvld_x86.dll有时候运行出错还需要复制这个dbghelp.dll网上的详细分析文章]]></content>
+      <categories>
+        <category>c++</category>
+      </categories>
+      <tags>
+        <tag>vld</tag>
+        <tag>0x0150002</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Facebook开源Zstandard新型压缩算法 简单使用]]></title>
+    <url>%2Fposts%2Fee0e8983%2F</url>
+    <content type="text"><![CDATA[简介Zstandard（缩写为Zstd）是由Facebook的Yann Collet开发的一个无损数据压缩算法。Zstandard在设计上与DEFLATE（.zip、gzip）算法有着差不多的压缩比，但有更高的压缩和解压缩速度。Zstandard使用字典算法（LZ77）结合熵编码法的有限状态熵（tANS）。—–WikipediaGitHub上的zstd页面Compressor nameRatioCompressionDecompress.zstd 1.1.3 -12.877430 MB/s1110 MB/szlib 1.2.8 -12.743110 MB/s400 MB/sbrotli 0.5.2 -02.708400 MB/s430 MB/squicklz 1.5.0 -12.238550 MB/s710 MB/slzo1x 2.09 -12.108650 MB/s830 MB/slz4 1.7.52.101720 MB/s3600 MB/ssnappy 1.1.32.091500 MB/s1650 MB/slzf 3.6 -12.077400 MB/s860 MB/s正文在Windows下Build很简单，进入\build\VS_scripts目录下根据不同环境运行相应的脚本即可！在项目中包含头文件#include “zstd/zstd.h”#pragma comment(lib,”libzstd.lib”);在项目exe目录下面加入libzstd.dll文件在项目lib文件夹(或者其他什么文件夹)加入libzstd.lib四个Simple API12345678910111213141516171819202122/*! ZSTD_compress() : * Compresses `src` content as a single zstd compressed frame into already allocated `dst`. * Hint : compression runs faster if `dstCapacity` &gt;= `ZSTD_compressBound(srcSize)`. * @return : compressed size written into `dst` (&lt;= `dstCapacity), * or an error code if it fails (which can be tested using ZSTD_isError()). */ZSTDLIB_API size_t ZSTD_compress( void* dst, size_t dstCapacity, const void* src, size_t srcSize, int compressionLevel);/*! ZSTD_decompress() : * `compressedSize` : must be the _exact_ size of some number of compressed and/or skippable frames. * `dstCapacity` is an upper bound of originalSize. * If user cannot imply a maximum upper bound, it's better to use streaming mode to decompress data. * @return : the number of bytes decompressed into `dst` (&lt;= `dstCapacity`), * or an errorCode if it fails (which can be tested using ZSTD_isError()). */ZSTDLIB_API size_t ZSTD_decompress( void* dst, size_t dstCapacity, const void* src, size_t compressedSize); ZSTDLIB_API unsigned long long ZSTD_getDecompressedSize(const void* src, size_t srcSize); /*!&lt; maximum compressed size in worst case scenario */ZSTDLIB_API size_t ZSTD_compressBound(size_t srcSize);压缩流程：使用ZSTD_compressBound获取最大压缩缓冲区大小，然后申请缓冲区；使用ZSTD_compress进行压缩1234567//可以设定压缩等级 1 up to ZSTD_maxCLevel()size_t dstSize = ZSTD_compress(pDest, szBufSize, pSource, szSrcSize, iCompressLevel);if (ZSTD_isError(dstSize))&#123; return -1;&#125;return dstSize;解压流程：可以使用ZSTD_getDecompressedSize来获取压缩后最大缓冲区大小；来申请解压缓冲区；123456size_t dstSize = ZSTD_decompress(pDest, szBufSize, pSource, szSrcSize);if (ZSTD_isError(dstSize))&#123; return -1;&#125;return dstSize;结束]]></content>
+      <categories>
+        <category>c++</category>
+        <category>压缩</category>
+      </categories>
+      <tags>
+        <tag>Zstandard</tag>
+        <tag>zstd</tag>
+        <tag>压缩</tag>
+        <tag>c++</tag>
+      </tags>
+  </entry>
+</search>
