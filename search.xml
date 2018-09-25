@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[Windows进程间共享内核对象几种方式]]></title>
+    <url>%2Fposts%2Fundefined%2F</url>
+    <content type="text"><![CDATA[内核对象的句柄是进程相关的，这样更可靠，更安全；Windows提供下列N种机制来允许进程共享内核对象。使用对象句柄继承==只有进程间存在父子关系才能使用对象句柄继承==；系统会遍历父进程的句柄表将所有有效的句柄完整的复制到子进程的句柄表中（这个动作只会在创建子进程的进行一次，后续父进程再创建句柄对象，子进程不会再继承），并且增加句柄的使用计数（类似于智能指针，Close等操作只是将使用计数减一）。CreateProcess创建进程，指定参数bInheritHandles为TRUE指定为父子进程，进行对象句柄继承，句柄跟进程有关，只有继承后子进程才能使用父进程句柄；使用进程间通信技术传递例如：通过命令行参数将句柄值传递给子进程）通过设置父进程环境变量，子进程获取GetEnvironmentVariable；如果子进程是有窗口的程序 通过函数WaitForInputIdle等待窗口程序初始化完成后 向窗口发消息；改变句柄状态（控制哪些子进程可以继承内核对象句柄）父进程跟孙进程通信，不让子进程关闭句柄。通过SetHandleInfomation改变具柄状态，但是子进程也可以改这个状态从而关闭句柄（这就很尴尬了）。SetHandleInformation具体使用请看MSDN.aspx)1234567891011121314151617BOOL WINAPI SetHandleInformation（ _In_ HANDLE hObject，//要设置其信息的对象的句柄。 _In_ DWORD dwMask， _In_ DWORD dwFlags）;//每个句柄都关联了两个标志#define HANDLE_FLAG_INHERIT 0x00000001#define HANDLE_FLAG_PROTECT_FROM_CLOSE 0x00000002//打开内核对象句柄的继承标志SetHandleInformation(hObj, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);//关闭内核对象句柄的继承标志SetHandleInformation(hObj, HANDLE_FLAG_INHERIT, 0) ;//HANDLE_FLAG_PROTECT_FROM_CLOSE标志告诉系统不允许关闭句柄SetHandleInformation(hObj, HANDLE_FLAG_PROTECT_FROM_CLOSE, HANDLE_FLAG_PROTECT_FROM_CLOSE);CloseHandle(h0bj); //会引发异常命名对象通过对象的名称来共享内核对象，并不需要父子进程关系； windows大多数对象都可以进行命名，但是并没有提供保证为内核对象指定的名称是唯一的，所以命名可以以“公司名称+随机字符+名称”等方式来命名。以这样的私有命名方式，防止单实例程序被攻击（命名冲突，导致一直不能启动程序）。调用（Create）系列函数可以通过调用GetLastError来判断是打开了一个已用的对象还是创建了一个新的对象。（Open）系列函数如果不存在否则返回NULL。应用例子：==可以利用命名对象来防止程序运行多个实例。==12345678910111213141516HANDLE CreateMutex( LPSECURITY_ATTRIBUTES lpMutexAttributes, BOOL bInitialOwner, LPCTSTR lpName //对象名称 传入NULL创建匿名对象); HANDLE hMutex = ::OpenMutex(MUTEX_ALL_ACCESS, FALSE, “Company_0DntbbRl5qP3_AppName”); if ( hMutex ) &#123; // 应用程序已存在实例 &#125; else &#123; // 不存在，创建命名对象 hMutex = ::CreateMutex(0, FALSE, “Company_0DntbbRl5qP3_AppName”); &#125;复制对象句柄获得一个进程的句柄表的一个记录项，然后在另外一个进程的句柄表中创建这个记录项的一个副本。同样的目标进程并不知道它能访问什么内核对象，必须使用进程间通信方式告诉它句柄值；这时已经启动，所以不能使用命令行参数或进程的环境变量。123456789BOOL WINAPI DuplicateHandle( _In_ HANDLE hSourceProcessHandle, // 源进程内核对象 _In_ HANDLE hSourceHandle, // 源任何类型内核对象；不能与调用DuplicateHandle函数的进程相关，必须与hSourceProcessHandle句柄所标识的进程相关（除非hSourceProcessHandle就是调用DuplicateHandle函数的进程，即当前进程） _In_ HANDLE hTargetProcessHandle, // 目标进程内核对象 _Out_ LPHANDLE lpTargetHandle, // HANDLE变量的地址，用来接收复制得到的HANDLE值；不能调用CloseHandle（除非hTargetProcessHandle就是调用DuplicateHandle函数的进程，即当前进程） _In_ DWORD dwDesiredAccess, _In_ BOOL bInheritHandle, _In_ DWORD dwOptions);BTW：子进程与父进程通信不应该使用进程ID，应该使用内核对象或者窗口句柄等更持久的通信机制。因为系统分配进程ID是会回收重新使用的。]]></content>
+      <categories>
+        <category>Windows</category>
+      </categories>
+      <tags>
+        <tag>Windows</tag>
+        <tag>内核对象</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[Effective C++笔记 4-5]]></title>
     <url>%2Fposts%2F20b36fe4%2F</url>
     <content type="text"><![CDATA[原书在线阅读条款04： 确保对象在使用前被初始化C风格数组不保证其内容被初始化，STL中vector保证初始化；内置类型手工初始化,外置类型确保每一个构造函数都将对象的每一个成员初始化；12345int x = 0; // manual initialization of an intconst char * text = &quot;A C-style string&quot;; // manual initialization of a // pointer (see also Item 3)double d; // &quot;initialization&quot; by reading fromstd::cin &gt;&gt; d; // an input stream对象成员变量的初始化动作发生在进入构造函数之前，对于内置类型初始化和赋值成本相同1234567ABEntry::ABEntry(const std::string&amp; name, const std::string&amp; address, const std::list&lt;PhoneNumber&gt;&amp; phones): theName(name), theAddress(address), // these are now all initializations thePhones(phones), numTimesConsulted(0)&#123;&#125; // the ctor body is now emptydefault构造成员变量123456ABEntry::ABEntry():theName(), // call theName&apos;s default ctor; theAddress(), // do the same for theAddress; thePhones(), // and for thePhones; numTimesConsulted(0) // but explicitly initialize&#123;&#125; // numTimesConsulted to zeroc++ 成员初始化顺序：base classes早于derived classes被初始化，class的成员变量比声明顺序初始化，成员初始化列表不影响初始化顺序，初始化array需要指定大小，代表大小的成员变量需要先有初值；C++对于不同编译单元内的非局部静态对象的初始化次序没有明确定义1234567891011121314151617//在tfs对象被创建之前不能使用。class FileSystem &#123; // from your librarypublic: std::size_t numDisks() const; // one of many member functions&#125;;extern FileSystem tfs; // object for clients to use; // &quot;tfs&quot; = &quot;the file system&quot; class Directory &#123; // created by library clientpublic: Directory( params );&#125;;Directory::Directory( params )&#123; std::size_t disks = tfs.numDisks(); // use the tfs object&#125;将静态对象移到它自己的函数中声明为static。函数返回对象的引用。12345678910111213141516171819class FileSystem &#123; ... &#125;; // as beforeFileSystem&amp; tfs() // this replaces the tfs object; it could be&#123; // static in the FileSystem class static FileSystem fs; // define and initialize a local static object return fs; // return a reference to it&#125;class Directory &#123; ... &#125;; // as beforeDirectory::Directory( params ) // as before, except references to tfs are&#123; // now to tfs() std::size_t disks = tfs().numDisks();&#125;Directory&amp; tempDir() // this replaces the tempDir object; it&#123; // could be static in the Directory class static Directory td; // define/initialize local static object return td; // return reference to it&#125;在多线程中存在次序问题。解决这个麻烦的方法之一是在程序的单线程的启动部分手动调用所有初始化函数。避免 与初始化次序相关的混乱环境。要点：避免在初始化之前使用对象，你只需要做三件事。首先，手动初始化内置类型的 非成员对象。第二，使用成员初始化列表初始化 对象的所有部分。最后，在设计中绕过搞乱定义在分离的转换单元中的非局部静态对象初始化顺序的不确定性。记住手动初始化 built-in type（内建类型）的 objects（对象），因为 C++ 只在某些时候才会自己初始化它们。构造函数使用成员初始化列表，成员初始化表的排列次序应该与class中声明次序相同；为避免跨编译单元的初始化次序问题，以局部静态对象替换非局部静态对象；条款05： 了解C++默默编写并调用了哪些函数如果你没有声明，编译器默认生成的函数：copy构造函数、copy assignment操作符、析构函数12345678class Empty &#123;public: Empty() &#123; ... &#125; // default constructor Empty(const Empty&amp; rhs) &#123; ... &#125; // copy constructor ~Empty() &#123; ... &#125; // destructor — see below // for whether it&apos;s virtual Empty&amp; operator=(const Empty&amp; rhs) &#123; ... &#125; // copy assignment operator&#125;;注意，生成的析构函数是non-virtual的，除非基类声明了一个虚拟析构函数（这种情况下，函数的virtualness（虚拟性）来自基类）。如果基类将copy assignment操作符声明为private，编译器拒绝为其派生类生成copy assignment运算符。记住编译器会暗自为class创建default构造函数、copy构造函数、copy assignment操作符、析构函数。]]></content>
@@ -9,8 +21,8 @@
       </categories>
       <tags>
         <tag>c++</tag>
-        <tag>effective c++</tag>
         <tag>读书笔记</tag>
+        <tag>effective c++</tag>
       </tags>
   </entry>
   <entry>
@@ -22,8 +34,8 @@
       </categories>
       <tags>
         <tag>c++</tag>
-        <tag>读书笔记</tag>
         <tag>effectivec++</tag>
+        <tag>读书笔记</tag>
       </tags>
   </entry>
   <entry>
@@ -60,8 +72,8 @@
         <category>python</category>
       </categories>
       <tags>
-        <tag>python</tag>
         <tag>词云</tag>
+        <tag>python</tag>
         <tag>wordcloud</tag>
       </tags>
   </entry>
