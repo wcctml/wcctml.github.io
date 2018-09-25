@@ -2,9 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://keepstan.ga/posts/413d867/</loc>
+    
+    <lastmod>2018-09-25T09:50:24.255Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://keepstan.ga/posts/a180e4c3/</loc>
+    
+    <lastmod>2018-09-25T09:44:56.755Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://keepstan.ga/posts/72cc9af1/</loc>
     
-    <lastmod>2018-09-25T09:06:29.635Z</lastmod>
+    <lastmod>2018-09-25T09:42:13.913Z</lastmod>
     
   </url>
   
@@ -16,14 +30,14 @@
   </url>
   
   <url>
-    <loc>https://keepstan.ga/categories/index.html</loc>
+    <loc>https://keepstan.ga/tags/index.html</loc>
     
     <lastmod>2018-09-20T02:05:38.358Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://keepstan.ga/tags/index.html</loc>
+    <loc>https://keepstan.ga/categories/index.html</loc>
     
     <lastmod>2018-09-20T02:05:38.358Z</lastmod>
     
@@ -68,20 +82,6 @@
     <loc>https://keepstan.ga/posts/20b36fe4/</loc>
     
     <lastmod>2018-09-20T02:05:38.294Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://keepstan.ga/posts/a180e4c3/</loc>
-    
-    <lastmod>2018-09-20T02:05:38.285Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://keepstan.ga/posts/413d867/</loc>
-    
-    <lastmod>2018-09-20T02:05:38.275Z</lastmod>
     
   </url>
   
