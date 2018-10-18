@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://keepstan.ga/"/>
-  <updated>2018-09-25T09:42:13.913Z</updated>
+  <updated>2018-10-18T09:49:53.935Z</updated>
   <id>https://keepstan.ga/</id>
   
   <author>
@@ -17,11 +17,36 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>2018年10月18日读报时间</title>
+    <link href="https://keepstan.ga/posts/4e229866/"/>
+    <id>https://keepstan.ga/posts/4e229866/</id>
+    <published>2018-10-18T09:29:00.000Z</published>
+    <updated>2018-10-18T09:49:53.935Z</updated>
+    
+    <content type="html"><![CDATA[<p><strong>2018年10月18日</strong><br>星期四 读报时间<br>1、国家发改委等28部门联合发文，将对严重危害正常医疗秩序的失信行为责任人实施联合惩戒;<br>2、农业农村部副部长于康震带队赴北京市和天津市现场督导非洲猪瘟防控并召开座谈会：发挥联防联控机制，严防疫情扩散;<br>3、中国人民银行日前发布了公告，在银行间债券市场正式推出三方回购交易;<br>4、古驰因顾虑假货不愿与中国电商合作;<br>5、台湾当局官员赖清德主张“美台建交”，国台办昨日回应，这是一个做梦的人，说的是梦话;<br>6、西安面向全国公开招聘254名博士，拿出优厚的待遇政策留下人才;<br>7、云南昆明微信群主罗某默许他人在群中发布淫秽视频515个。因犯传播淫秽物品罪，罗某被法院判处有期徒刑6个月;<br>8、河南夏邑被指借棚改强征千亩耕地，当地回应：错发土地权证，将重新发证;<br>9、新财富不雅饭局处理结果出炉：分析师马军与同事廖蕾在饭局期间发生搂抱行为，方正证券对当事人马军予以降级降薪处罚;<br>10、我爱我家发布三季报：1至9月营收84亿元，同比增长797.10%。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;&lt;strong&gt;2018年10月18日&lt;/strong&gt;&lt;br&gt;星期四 读报时间&lt;br&gt;1、国家发改委等28部门联合发文，将对严重危害正常医疗秩序的失信行为责任人实施联合惩戒;&lt;br&gt;2、农业农村部副部长于康震带队赴北京市和天津市现场督导非洲猪瘟防控并召开座谈会：发挥联防联
+      
+    
+    </summary>
+    
+      <category term="每日早报" scheme="https://keepstan.ga/categories/%E6%AF%8F%E6%97%A5%E6%97%A9%E6%8A%A5/"/>
+    
+    
+      <category term="每日早报" scheme="https://keepstan.ga/tags/%E6%AF%8F%E6%97%A5%E6%97%A9%E6%8A%A5/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Windows进程间共享内核对象几种方式</title>
     <link href="https://keepstan.ga/posts/72cc9af1/"/>
     <id>https://keepstan.ga/posts/72cc9af1/</id>
     <published>2018-09-24T14:38:00.000Z</published>
-    <updated>2018-09-25T09:42:13.913Z</updated>
+    <updated>2018-10-18T09:43:39.805Z</updated>
     
     <content type="html"><![CDATA[<p>内核对象的句柄是进程相关的，这样更可靠，更安全；Windows提供下列N种机制来允许进程共享内核对象。</p><h2 id="使用对象句柄继承"><a href="#使用对象句柄继承" class="headerlink" title="使用对象句柄继承"></a>使用对象句柄继承</h2><p><strong>只有进程间存在父子关系才能使用对象句柄继承</strong>；系统会遍历父进程的句柄表将所有有效的句柄完整的复制到子进程的句柄表中（这个动作只会在创建子进程的进行一次，后续父进程再创建句柄对象，子进程不会再继承），并且增加句柄的使用计数（类似于智能指针，Close等操作只是将使用计数减一）。</p><p>CreateProcess创建进程，指定参数bInheritHandles为TRUE指定为父子进程，进行对象句柄继承，句柄跟进程有关，只有继承后子进程才能使用父进程句柄；</p><h3 id="使用进程间通信技术传递"><a href="#使用进程间通信技术传递" class="headerlink" title="使用进程间通信技术传递"></a>使用进程间通信技术传递</h3><ol><li>例如：通过命令行参数将句柄值传递给子进程）</li><li>通过设置父进程环境变量，子进程获取GetEnvironmentVariable；</li><li>如果子进程是有窗口的程序 通过函数WaitForInputIdle等待窗口程序初始化完成后 向窗口发消息；</li></ol><h3 id="改变句柄状态（控制哪些子进程可以继承内核对象句柄）"><a href="#改变句柄状态（控制哪些子进程可以继承内核对象句柄）" class="headerlink" title="改变句柄状态（控制哪些子进程可以继承内核对象句柄）"></a>改变句柄状态（控制哪些子进程可以继承内核对象句柄）</h3><p>父进程跟孙进程通信，不让子进程关闭句柄。通过SetHandleInfomation改变具柄状态，但是子进程也可以改这个状态从而关闭句柄（这就很尴尬了）。</p><p><a href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms724935%28v=vs.85%29.aspx?f=255&amp;MSPPError=-2147217396" target="_blank" rel="noopener">SetHandleInformation具体使用请看MSDN</a></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">BOOL WINAPI SetHandleInformation（</span><br><span class="line">  _In_ HANDLE hObject，//要设置其信息的对象的句柄。</span><br><span class="line">  _In_ DWORD dwMask，</span><br><span class="line">  _In_ DWORD dwFlags</span><br><span class="line">）;</span><br><span class="line"></span><br><span class="line">//每个句柄都关联了两个标志</span><br><span class="line">#define HANDLE_FLAG_INHERIT  0x00000001</span><br><span class="line">#define HANDLE_FLAG_PROTECT_FROM_CLOSE  0x00000002</span><br><span class="line"></span><br><span class="line">//打开内核对象句柄的继承标志</span><br><span class="line">SetHandleInformation(hObj, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);</span><br><span class="line">//关闭内核对象句柄的继承标志</span><br><span class="line">SetHandleInformation(hObj, HANDLE_FLAG_INHERIT, 0) ;</span><br><span class="line">//HANDLE_FLAG_PROTECT_FROM_CLOSE标志告诉系统不允许关闭句柄</span><br><span class="line">SetHandleInformation(hObj, HANDLE_FLAG_PROTECT_FROM_CLOSE, HANDLE_FLAG_PROTECT_FROM_CLOSE);</span><br><span class="line">CloseHandle(h0bj); //会引发异常</span><br></pre></td></tr></table></figure><h2 id="命名对象"><a href="#命名对象" class="headerlink" title="命名对象"></a>命名对象</h2><p>通过对象的名称来共享内核对象，并不需要父子进程关系； windows大多数对象都可以进行命名，但是并没有提供保证为内核对象指定的名称是唯一的，所以命名可以以“公司名称+随机字符+名称”等方式来命名。以这样的私有命名方式，防止单实例程序被攻击（命名冲突，导致一直不能启动程序）。</p><p>调用（ Create ）系列函数可以通过调用GetLastError来判断是打开了一个已用的对象还是创建了一个新的对象。（Open）系列函数如果不存在否则返回NULL。</p><p>应用例子：<strong>可以利用命名对象来防止程序运行多个实例。</strong></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">HANDLE CreateMutex( </span><br><span class="line">  LPSECURITY_ATTRIBUTES lpMutexAttributes, </span><br><span class="line">  BOOL bInitialOwner, </span><br><span class="line">  LPCTSTR lpName //对象名称 传入NULL创建匿名对象</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">HANDLE hMutex = ::OpenMutex(MUTEX_ALL_ACCESS, FALSE, “Company_0DntbbRl5qP3_AppName”);</span><br><span class="line">if ( hMutex )</span><br><span class="line">&#123;</span><br><span class="line">    // 应用程序已存在实例</span><br><span class="line">&#125;</span><br><span class="line">else</span><br><span class="line">&#123;</span><br><span class="line">    // 不存在，创建命名对象</span><br><span class="line">hMutex = ::CreateMutex(0, FALSE, “Company_0DntbbRl5qP3_AppName”);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h2 id="复制对象句柄"><a href="#复制对象句柄" class="headerlink" title="复制对象句柄"></a>复制对象句柄</h2><p>获得一个进程的句柄表的一个记录项，然后在另外一个进程的句柄表中创建这个记录项的一个副本。同样的目标进程并不知道它能访问什么内核对象，必须使用进程间通信方式告诉它句柄值；这时已经启动，所以不能使用命令行参数或进程的环境变量。</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">BOOL WINAPI DuplicateHandle(</span><br><span class="line">  _In_  HANDLE   hSourceProcessHandle,     // 源进程内核对象</span><br><span class="line">  _In_  HANDLE   hSourceHandle,     // 源任何类型内核对象；不能与调用DuplicateHandle函数的进程相关，必须与hSourceProcessHandle句柄所标识的进程相关（除非hSourceProcessHandle就是调用DuplicateHandle函数的进程，即当前进程）</span><br><span class="line">  _In_  HANDLE   hTargetProcessHandle,     // 目标进程内核对象</span><br><span class="line">  _Out_ LPHANDLE lpTargetHandle,     // HANDLE变量的地址，用来接收复制得到的HANDLE值；不能调用CloseHandle（除非hTargetProcessHandle就是调用DuplicateHandle函数的进程，即当前进程）</span><br><span class="line">  _In_  DWORD    dwDesiredAccess,</span><br><span class="line">  _In_  BOOL     bInheritHandle,</span><br><span class="line">  _In_  DWORD    dwOptions</span><br><span class="line">);</span><br></pre></td></tr></table></figure><p><strong>BTW：子进程与父进程通信不应该使用进程ID，应该使用内核对象或者窗口句柄等更持久的通信机制。因为系统分配进程ID是会回收重新使用的。</strong></p>]]></content>
     
@@ -66,9 +91,9 @@
     
       <category term="c++" scheme="https://keepstan.ga/tags/c/"/>
     
-      <category term="读书笔记" scheme="https://keepstan.ga/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
-    
       <category term="effective c++" scheme="https://keepstan.ga/tags/effective-c/"/>
+    
+      <category term="读书笔记" scheme="https://keepstan.ga/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
     
   </entry>
   
@@ -95,9 +120,9 @@
     
       <category term="c++" scheme="https://keepstan.ga/tags/c/"/>
     
-      <category term="effectivec++" scheme="https://keepstan.ga/tags/effectivec/"/>
-    
       <category term="读书笔记" scheme="https://keepstan.ga/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+      <category term="effectivec++" scheme="https://keepstan.ga/tags/effectivec/"/>
     
   </entry>
   
