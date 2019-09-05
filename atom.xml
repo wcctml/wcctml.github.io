@@ -91,9 +91,9 @@
     
       <category term="c++" scheme="https://keepstan.ga/tags/c/"/>
     
-      <category term="effective c++" scheme="https://keepstan.ga/tags/effective-c/"/>
-    
       <category term="读书笔记" scheme="https://keepstan.ga/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+      <category term="effective c++" scheme="https://keepstan.ga/tags/effective-c/"/>
     
   </entry>
   
@@ -120,9 +120,9 @@
     
       <category term="c++" scheme="https://keepstan.ga/tags/c/"/>
     
-      <category term="读书笔记" scheme="https://keepstan.ga/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
-    
       <category term="effectivec++" scheme="https://keepstan.ga/tags/effectivec/"/>
+    
+      <category term="读书笔记" scheme="https://keepstan.ga/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
     
   </entry>
   
@@ -205,9 +205,9 @@
       <category term="python" scheme="https://keepstan.ga/categories/python/"/>
     
     
-      <category term="python" scheme="https://keepstan.ga/tags/python/"/>
-    
       <category term="词云" scheme="https://keepstan.ga/tags/%E8%AF%8D%E4%BA%91/"/>
+    
+      <category term="python" scheme="https://keepstan.ga/tags/python/"/>
     
       <category term="wordcloud" scheme="https://keepstan.ga/tags/wordcloud/"/>
     
